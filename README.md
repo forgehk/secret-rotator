@@ -2,7 +2,7 @@
 
 > Rotate API keys across providers (AWS, GitHub, Stripe, ...) with snapshot-and-rollback safety. Pluggable provider drivers, YAML config, append-only audit log.
 
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/forgehk/secret-rotator/actions/workflows/ci.yml/badge.svg)](https://github.com/forgehk/secret-rotator/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)]() [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
@@ -119,9 +119,11 @@ Each provider/store/verifier is a small class implementing a 3-method protocol. 
 ## Install
 
 ```bash
-pip install secret-rotator
+pip install git+https://github.com/forgehk/secret-rotator.git
 secret-rotator --help
 ```
+
+The package is not published on PyPI; the `secret-rotator` name there belongs to an unrelated project.
 
 ---
 
