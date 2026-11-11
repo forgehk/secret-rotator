@@ -116,6 +116,20 @@ Each provider/store/verifier is a small class implementing a 3-method protocol. 
 
 ---
 
+## Audit log
+
+Each rotation appends one JSON record to the audit log. Records are hash-chained: `prev` holds the hash of the record before it (64 zeros for the first), and `hash` is SHA-256 over the record's canonical JSON without the `hash` field. Editing, deleting or reordering a line breaks the chain:
+
+```bash
+$ secret-rotator demo --audit audit.jsonl > /dev/null
+$ secret-rotator audit verify --audit audit.jsonl
+audit log OK: 1 records, chain intact
+```
+
+`audit verify` exits 0 when the chain is intact, 1 with the first broken line number when it is not, and 2 when the file is missing. The chain detects changes inside the file; someone who can rewrite the whole file can also recompute every hash, so ship the log (or its last hash) somewhere append-only if that matters to you.
+
+---
+
 ## Install
 
 ```bash
@@ -130,7 +144,7 @@ The package is not published on PyPI; the `secret-rotator` name there belongs to
 ## Roadmap
 
 - [x] Pluggable provider/store/verifier protocol
-- [x] Append-only JSON-lines audit log
+- [x] Append-only JSON-lines audit log, hash-chained, with `secret-rotator audit verify`
 - [x] Snapshot-and-restore rollback path
 - [x] Dry-run mode
 - [ ] AWS IAM, SSM driver implementations
