@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .audit import verify_log
 from .engine import RotationEngine
 from .providers import MockProvider
 from .stores import MockStore
@@ -21,7 +22,23 @@ def main(argv: list[str] | None = None) -> int:
                       help="Force the verify step to fail so you can see rollback.")
     demo.add_argument("--audit", type=Path, default=Path("./audit.jsonl"))
 
+    audit = sub.add_parser("audit", help="Inspect the audit log.")
+    audit_sub = audit.add_subparsers(dest="audit_cmd", required=True)
+    verify = audit_sub.add_parser("verify", help="Check the audit log's hash chain.")
+    verify.add_argument("--audit", type=Path, default=Path("./audit.jsonl"))
+
     args = p.parse_args(argv)
+    if args.cmd == "audit":
+        if not args.audit.exists():
+            print(f"no audit log at {args.audit}", file=sys.stderr)
+            return 2
+        report = verify_log(args.audit)
+        if report.ok:
+            print(f"audit log OK: {report.entries} records, chain intact")
+            return 0
+        print(f"audit log BROKEN at line {report.bad_line}: {report.reason} "
+              f"({report.entries} records verified before it)")
+        return 1
     if args.cmd == "demo":
         engine = RotationEngine(
             key_name="demo_key",
