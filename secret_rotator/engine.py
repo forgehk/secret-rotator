@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .audit import chain, last_hash
 from .providers import Credential, Provider
 from .stores import SecretStore
 from .verifiers import Verifier
@@ -77,7 +78,6 @@ class RotationEngine:
             # 1. Provision new credential
             if dry_run:
                 self._step(result, "provision", detail="(dry-run) would call provider.provision()")
-                self._emit_audit(result)
                 result.succeeded = True
                 return result
             new_cred = self.provider.provision()
@@ -138,6 +138,7 @@ class RotationEngine:
             "new_credential_id": result.new_credential_id,
             "steps": [s.to_dict() for s in result.steps],
         }
+        record = chain(record, last_hash(self.audit_log_path))
         line = json.dumps(record)
         result.audit_lines.append(line)
         if self.audit_log_path is not None:
